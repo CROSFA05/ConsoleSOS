@@ -1,8 +1,6 @@
 package com.itescasos.Core;
 
-
-//Este PCB incluye el control de ráfagas de CPU, el consumo de E/S y 
-// contadores detallados para las métricas.
+// Este PCB incluye el control de ráfagas de CPU, el consumo de E/S y contadores detallados para las métricas.
 public class PCB {
     
     public final String pid;
