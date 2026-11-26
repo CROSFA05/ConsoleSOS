@@ -10,3 +10,5 @@ sos-matriz.txt
 .settings/
 .classpath
 .project
+pom.xml
+test/

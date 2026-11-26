@@ -299,6 +299,7 @@ public class GestorMemoria {
         }
 
         Marco[] marcosLocales = nuevosMarcos();
+        @SuppressWarnings("unused")
         long reloj = 0L;
         long orden = 0L;
         int puntero = 0;
@@ -585,6 +586,7 @@ public class GestorMemoria {
         private String pid;
         private int pagina = -1;
         private boolean bitReferencia;
+        @SuppressWarnings("unused")
         private boolean bitModificacion;
         private long ultimoUso = -1L;
         private long ordenCarga = -1L;

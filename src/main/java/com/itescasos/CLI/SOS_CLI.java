@@ -1,4 +1,4 @@
-package com.itescasos.cli;
+package com.itescasos.CLI;
 
 import java.io.BufferedReader;
 import java.io.Console;
@@ -13,7 +13,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
-import java.util.function.Function;
 
 import com.itescasos.Archivos.ErrorFS;
 import com.itescasos.Archivos.Fsck;
@@ -37,7 +36,6 @@ import com.itescasos.IO.ImagenDisco;
 import com.itescasos.IO.PoliticaDisco;
 import com.itescasos.IO.SimuladorES;
 import com.itescasos.Memoria.GestorMemoria;
-import com.itescasos.Seguridad.Derecho;
 import com.itescasos.Seguridad.ServicioSeguridad;
 
 /**
@@ -48,7 +46,7 @@ import com.itescasos.Seguridad.ServicioSeguridad;
  * archivos alcance el disco a través del driver. Cada invocación independiente
  * debe autenticarse de nuevo: la imagen y la matriz persisten, la sesión no.
  */
-public class SosCli {
+public class SOS_CLI {
 
     private static final int TAM_BLOQUE = 128;
     private static final int TOTAL_BLOQUES = 256;
@@ -60,6 +58,7 @@ public class SosCli {
     private final Reloj reloj = new Reloj();
     private final RegistroEventos registro;
     private final Scanner teclado;
+    @SuppressWarnings("unused")
     private final boolean interactivo;
 
     private Path imagen = Paths.get("disk.img");
@@ -70,7 +69,7 @@ public class SosCli {
 
     public static void main(String[] args) {
         try {
-            SosCli cli = new SosCli(args.length == 0);
+            SOS_CLI cli = new SOS_CLI(args.length == 0);
             cli.run(args);
         } catch (Exception e) {
             System.err.println("Error: " + e.getMessage());
@@ -78,7 +77,7 @@ public class SosCli {
         }
     }
 
-    private SosCli(boolean interactivo) throws IOException {
+    private SOS_CLI(boolean interactivo) throws IOException {
         this.interactivo = interactivo;
         this.teclado = interactivo ? new Scanner(System.in, "UTF-8") : null;
         String dir = System.getenv("SOS_SEGURIDAD_DIR");

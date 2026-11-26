@@ -47,6 +47,7 @@ public class SistemaArchivos {
     private int siguienteFd = 3;
 
     private static final class Apertura {
+        @SuppressWarnings("unused")
         final int fd;
         final int inodo;
         final int idObjeto;
@@ -384,7 +385,6 @@ public class SistemaArchivos {
         }
     }
 
-    /** Reemplaza TODO el contenido (semántica del comando fs write). Rechazo => sin cambios. */
     public void reemplazarContenido(String ruta, byte[] datos) {
         Inodo ino = archivoParaEscribir(ruta);
         guardarContenido(ino, datos, false, null, null);
