@@ -67,7 +67,7 @@ public class RunnerEscenarios {
     private final Set<String> pidsIntegrados = new java.util.HashSet<String>();
 
     public RunnerEscenarios(Escenario esc, ServicioSeguridad seguridad, Consumer<String> salida,
-                            Function<String, String> proveedorSecreto) {
+            Function<String, String> proveedorSecreto) {
         this.esc = esc;
         this.seguridad = seguridad;
         this.salida = salida;
@@ -78,7 +78,9 @@ public class RunnerEscenarios {
         }
     }
 
-    public RegistroEventos registro() { return registro; }
+    public RegistroEventos registro() {
+        return registro;
+    }
 
     // ==================================================================== modos
 
@@ -86,7 +88,8 @@ public class RunnerEscenarios {
         cabecera("PLANIFICACIÓN DE CPU");
         List<PCB> carga = construirProcesos();
         List<String> algoritmos = esc.compararCPU.isEmpty()
-                ? Collections.singletonList(esc.algoritmo) : esc.compararCPU;
+                ? Collections.singletonList(esc.algoritmo)
+                : esc.compararCPU;
         registrarConfiguracion("algoritmos=" + algoritmos + " quantum=" + esc.quantum);
         for (String algoritmo : algoritmos) {
             PlanificadorCPU motor = new PlanificadorCPU();
@@ -103,12 +106,14 @@ public class RunnerEscenarios {
         registrarConfiguracion("marcos=" + esc.marcosTotales + " tamPagina=" + esc.tamPagina
                 + " pid=" + esc.pidReferencias);
         List<String> politicas = esc.compararMemoria.isEmpty()
-                ? Collections.singletonList(esc.reemplazo) : esc.compararMemoria;
+                ? Collections.singletonList(esc.reemplazo)
+                : esc.compararMemoria;
         for (String politica : politicas) {
             GestorMemoria gm = nuevaMemoria();
             List<Integer> cadena = new ArrayList<Integer>();
             for (Escenario.RefDef r : esc.referencias) {
-                if (r.pid.equals(esc.pidReferencias)) cadena.add(r.pagina);
+                if (r.pid.equals(esc.pidReferencias))
+                    cadena.add(r.pagina);
             }
             GestorMemoria.Resultado r = gm.simular(esc.pidReferencias, cadena, politica);
             salida.accept("--- Reemplazo " + politica + " ---");
@@ -124,12 +129,20 @@ public class RunnerEscenarios {
         }
         List<SimuladorES.Corrida> corridas = SimuladorES.ejecutar(esc.io);
         java.io.ByteArrayOutputStream buffer = new java.io.ByteArrayOutputStream();
-        SimuladorES.imprimir(esc.io, corridas,
-                new java.io.PrintStream(buffer, true, StandardCharsets.UTF_8));
-        salida.accept(new String(buffer.toByteArray(), StandardCharsets.UTF_8));
+        try {
+            java.io.PrintStream ps = new java.io.PrintStream(buffer, true, "UTF-8");
+            SimuladorES.imprimir(esc.io, corridas, ps);
+            ps.flush();
+            salida.accept(new String(buffer.toByteArray(), "UTF-8"));
+        } catch (java.io.UnsupportedEncodingException e) {
+            throw new IllegalStateException("Codificación UTF-8 no soportada", e);
+        }
     }
 
-    /** Ciclo completo: archivos + permisos + cifrado + memoria + CPU + E/S en un solo reloj. */
+    /**
+     * Ciclo completo: archivos + permisos + cifrado + memoria + CPU + E/S en un
+     * solo reloj.
+     */
     public void completo() {
         cabecera("CICLO INTEGRADO");
         try {
@@ -154,13 +167,18 @@ public class RunnerEscenarios {
 
     /** Ejecuta todas las secciones presentes, en el orden de la demostración. */
     public void ejecutarTodo() {
-        if (esc.tieneProcesos()) planificacion();
-        if (!esc.referencias.isEmpty()) memoria();
-        if (esc.tieneIo) io();
-        if (esc.tieneProcesos() || !esc.archivos.isEmpty()) completo();
+        if (esc.tieneProcesos())
+            planificacion();
+        if (!esc.referencias.isEmpty())
+            memoria();
+        if (esc.tieneIo)
+            io();
+        if (esc.tieneProcesos() || !esc.archivos.isEmpty())
+            completo();
     }
 
-    // ==================================================================== integración
+    // ====================================================================
+    // integración
 
     private void autenticarDesdeEscenario() {
         if (esc.usuario == null || esc.usuario.trim().isEmpty()) {
@@ -168,7 +186,8 @@ public class RunnerEscenarios {
             return;
         }
         String clave = proveedorSecreto == null ? null : proveedorSecreto.apply("login:" + esc.usuario);
-        if (clave == null) clave = System.getenv("SOS_CLAVE");
+        if (clave == null)
+            clave = System.getenv("SOS_CLAVE");
         if (clave == null) {
             throw new IllegalStateException("se requiere la clave de " + esc.usuario
                     + " (variable SOS_CLAVE o entrada estándar)");
@@ -204,7 +223,8 @@ public class RunnerEscenarios {
             // Se muestran las solicitudes de los procesos del escenario; las del FS se
             // cuentan y se resumen al final para que la demo no produzca cientos de líneas.
             es.ponerLog(new Consumer<String>() {
-                @Override public void accept(String linea) {
+                @Override
+                public void accept(String linea) {
                     if (pidsIntegrados.contains(pidDeLinea(linea))) {
                         registro.texto(linea);
                     } else if (linea.contains("evento=IO_FIN")) {
@@ -237,10 +257,12 @@ public class RunnerEscenarios {
     /** Extrae el PID de una línea de log de E/S; "" si no lo tiene. */
     private static String pidDeLinea(String linea) {
         int i = linea.indexOf("pid=");
-        if (i < 0) return "";
+        if (i < 0)
+            return "";
         int inicio = i + 4;
         int fin = inicio;
-        while (fin < linea.length() && !Character.isWhitespace(linea.charAt(fin))) fin++;
+        while (fin < linea.length() && !Character.isWhitespace(linea.charAt(fin)))
+            fin++;
         return linea.substring(inicio, fin);
     }
 
@@ -302,13 +324,17 @@ public class RunnerEscenarios {
     }
 
     /**
-     * La clave de cifrado NUNCA se toma de una acción del escenario ni se escribe en el log.
-     * {@code clave_archivo=NOMBRE} declara qué variable de entorno debe consultarse; si no
-     * se declara se usa {@code SOS_CLAVE_ARCHIVO} (o el proveedor interactivo de la CLI).
+     * La clave de cifrado NUNCA se toma de una acción del escenario ni se escribe
+     * en el log.
+     * {@code clave_archivo=NOMBRE} declara qué variable de entorno debe
+     * consultarse; si no
+     * se declara se usa {@code SOS_CLAVE_ARCHIVO} (o el proveedor interactivo de la
+     * CLI).
      */
     private String claveArchivo(Escenario.Accion accion) {
         String variable = esc.claveArchivo == null || esc.claveArchivo.trim().isEmpty()
-                ? "SOS_CLAVE_ARCHIVO" : esc.claveArchivo.trim();
+                ? "SOS_CLAVE_ARCHIVO"
+                : esc.claveArchivo.trim();
         String clave = System.getenv(variable);
         if (clave == null && proveedorSecreto != null) {
             clave = proveedorSecreto.apply(variable);
@@ -323,8 +349,10 @@ public class RunnerEscenarios {
         for (Escenario.PermisoDef p : esc.permisos) {
             try {
                 int id = resolverObjeto(p.objeto);
-                if (p.revocar) seguridad.revocar(p.usuario, id);
-                else seguridad.conceder(p.usuario, id, p.rwx);
+                if (p.revocar)
+                    seguridad.revocar(p.usuario, id);
+                else
+                    seguridad.conceder(p.usuario, id, p.rwx);
             } catch (ErrorFS e) {
                 registro.emitir("SEC", seguridad.usuario(), p.objeto, "PERMISO",
                         "NO_APLICADO " + e.codigo());
@@ -340,7 +368,8 @@ public class RunnerEscenarios {
 
     private int resolverObjeto(String objeto) {
         String s = objeto.trim();
-        if (s.matches("\\d+")) return Integer.parseInt(s);
+        if (s.matches("\\d+"))
+            return Integer.parseInt(s);
         InfoArchivo info = fs.info(s);
         return info.idObjeto;
     }
@@ -348,8 +377,7 @@ public class RunnerEscenarios {
     private void iniciarSubsistemaIo() {
         // El administrador ya tiene los drivers creados al abrir la imagen.
         if (es.driver(DiscoSimulado.TERMINAL) instanceof com.itescasos.IO.DriverTerminal) {
-            com.itescasos.IO.DriverTerminal t =
-                    (com.itescasos.IO.DriverTerminal) es.driver(DiscoSimulado.TERMINAL);
+            com.itescasos.IO.DriverTerminal t = (com.itescasos.IO.DriverTerminal) es.driver(DiscoSimulado.TERMINAL);
             for (String linea : esc.io == null ? Collections.<String>emptyList() : esc.io.entradaTerminal) {
                 t.ponerEntrada(linea);
             }
@@ -366,15 +394,16 @@ public class RunnerEscenarios {
         for (Escenario.ProcDef p : esc.procesos) {
             memoria.asignarEspacio(p.pid, paginasDe(p));
         }
-        // Referencias por PID, en el orden declarado; se entregan al primer despacho >= t.
-        final Map<String, Queue<Escenario.RefDef>> pendientes =
-                new LinkedHashMap<String, Queue<Escenario.RefDef>>();
+        // Referencias por PID, en el orden declarado; se entregan al primer despacho >=
+        // t.
+        final Map<String, Queue<Escenario.RefDef>> pendientes = new LinkedHashMap<String, Queue<Escenario.RefDef>>();
         for (Escenario.ProcDef p : esc.procesos) {
             pendientes.put(p.pid, new ArrayDeque<Escenario.RefDef>());
         }
         final List<Escenario.RefDef> referencias = new ArrayList<Escenario.RefDef>(esc.referencias);
         Collections.sort(referencias, new Comparator<Escenario.RefDef>() {
-            @Override public int compare(Escenario.RefDef a, Escenario.RefDef b) {
+            @Override
+            public int compare(Escenario.RefDef a, Escenario.RefDef b) {
                 int c = Integer.compare(a.t, b.t);
                 return c != 0 ? c : Integer.compare(a.linea, b.linea);
             }
@@ -391,9 +420,11 @@ public class RunnerEscenarios {
         }
 
         Gancho gancho = new Gancho() {
-            @Override public void alTick(int t) {
+            @Override
+            public void alTick(int t) {
                 for (int i = 0; i < peticionesIo.size(); i++) {
-                    if (enviadas[i] || peticionesIo.get(i).t > t) continue;
+                    if (enviadas[i] || peticionesIo.get(i).t > t)
+                        continue;
                     EscenarioIO.Peticion p = peticionesIo.get(i);
                     enviadas[i] = true;
                     if (seguridad.haySesion() && !seguridad.autorizarDispositivo(
@@ -406,7 +437,8 @@ public class RunnerEscenarios {
                 }
                 for (int i = 0; i < referencias.size(); i++) {
                     Escenario.RefDef r = referencias.get(i);
-                    if (entregadas[i] || r.t > t) continue;
+                    if (entregadas[i] || r.t > t)
+                        continue;
                     Queue<Escenario.RefDef> q = pendientes.get(r.pid);
                     if (q == null) {
                         throw new IllegalStateException("referencia para PID desconocido: " + r.pid);
@@ -416,7 +448,8 @@ public class RunnerEscenarios {
                 }
             }
 
-            @Override public int alDespachar(PCB proceso, int t) {
+            @Override
+            public int alDespachar(PCB proceso, int t) {
                 int bloqueo = 0;
                 Queue<Escenario.RefDef> q = pendientes.get(proceso.pid);
                 Escenario.RefDef r = q == null ? null : q.poll();
@@ -449,7 +482,8 @@ public class RunnerEscenarios {
                 return bloqueo;
             }
 
-            @Override public void alTerminar(PCB proceso, int t) {
+            @Override
+            public void alTerminar(PCB proceso, int t) {
                 memoria.liberar(proceso.pid);
                 es.cancelarDePid(proceso.pid);
                 registro.emitir("MEMORIA", proceso.pid, "-", "LIBERACION",
@@ -465,7 +499,10 @@ public class RunnerEscenarios {
                 + " aciertos=" + memoria.aciertos() + " marcos=" + memoria.estadoMarcos());
     }
 
-    /** Operación de archivo pedida por un proceso: pasa por el FS y por la matriz de acceso. */
+    /**
+     * Operación de archivo pedida por un proceso: pasa por el FS y por la matriz de
+     * acceso.
+     */
     private void operacionArchivoProceso(Escenario.ProcDef p) {
         String evento = p.operacionArchivo.toUpperCase(Locale.ROOT) + "_PROCESO";
         try {
@@ -487,11 +524,13 @@ public class RunnerEscenarios {
     }
 
     private int paginasDe(Escenario.ProcDef p) {
-        if (p.paginas != null) return p.paginas;
+        if (p.paginas != null)
+            return p.paginas;
         int porTamano = (p.memoriaBytes + esc.tamPagina - 1) / esc.tamPagina;
         int maxRef = 0;
         for (Escenario.RefDef r : esc.referencias) {
-            if (r.pid.equals(p.pid)) maxRef = Math.max(maxRef, r.pagina + 1);
+            if (r.pid.equals(p.pid))
+                maxRef = Math.max(maxRef, r.pagina + 1);
         }
         return Math.max(1, Math.max(porTamano, maxRef));
     }
@@ -520,7 +559,10 @@ public class RunnerEscenarios {
 
     private void cerrar() {
         if (fs != null) {
-            try { fs.desmontar(); } catch (Exception ignored) { }
+            try {
+                fs.desmontar();
+            } catch (Exception ignored) {
+            }
             fs = null;
         }
         if (disco != null) {
@@ -534,14 +576,19 @@ public class RunnerEscenarios {
         seguridad.guardar();
     }
 
-    /** Proveedor de secretos: consola sin eco si está disponible; si no, entorno o stdin. */
+    /**
+     * Proveedor de secretos: consola sin eco si está disponible; si no, entorno o
+     * stdin.
+     */
     public static String pedirClave(String usuario, Function<String, String> alternativo) {
         if (alternativo != null) {
             String s = alternativo.apply(usuario);
-            if (s != null) return s;
+            if (s != null)
+                return s;
         }
         String entorno = System.getenv("SOS_CLAVE");
-        if (entorno != null) return entorno;
+        if (entorno != null)
+            return entorno;
         java.io.Console consola = System.console();
         if (consola != null) {
             char[] chars = consola.readPassword("Clave de " + usuario + ": ");
