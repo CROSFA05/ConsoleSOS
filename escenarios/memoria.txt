@@ -1,0 +1,9 @@
+# Caso de control del módulo 2: 3 marcos, cadena 0,1,2,0,3,1,4,0.
+# Esperado: FIFO 6, LRU 7, Óptimo 5 fallos.
+[memoria]
+marcos_totales = 3
+tam_pagina = 4096
+reemplazo = fifo
+pid = P1
+referencias = 0,1,2,0,3,1,4,0
+comparar = fifo, lru, optimo

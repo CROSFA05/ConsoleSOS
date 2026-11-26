@@ -1,0 +1,24 @@
+# Secuencia para el modo interactivo (NO es un escenario del parser; se envía por stdin).
+# Las claves NO se escriben aquí: se toman de SOS_CLAVE_<USUARIO> / SOS_CLAVE.
+auth login admin
+fs mkdir /clase
+fs create /clase/notas.txt 128
+fs write /clase/notas.txt Hola SOS
+fs read /clase/notas.txt
+sec permiso alumno /clase/notas.txt rw
+fs rename /clase/notas.txt /clase/apuntes.txt
+fs stat /clase/apuntes.txt
+fs ls /clase
+fs df
+auth login alumno
+fs read /clase/apuntes.txt
+auth login invitado
+fs read /clase/apuntes.txt
+sec cifrar /clase/apuntes.txt
+auth login admin
+sec cifrar /clase/apuntes.txt
+fs read /clase/apuntes.txt
+sec descifrar /clase/apuntes.txt
+fs read /clase/apuntes.txt
+fs umount
+exit

@@ -1,0 +1,49 @@
+# Demostración de integración: CPU + memoria + E/S + archivos + seguridad en un solo reloj.
+# La clave de sesión se toma de SOS_CLAVE (docente/docente en la demo).
+# La clave de cifrado se toma de SOS_CLAVE_ARCHIVO; NUNCA se escribe en el escenario.
+[procesos]
+P1, llegada=0, cpu=2+2, io=0+0, prioridad=2, memoria=8192, paginas=3, leer=/docs/notas.txt
+P2, llegada=0, cpu=1, io=0, prioridad=1, memoria=4096, paginas=2
+
+[planificacion]
+algoritmo = rr
+quantum = 2
+
+[memoria]
+marcos_totales = 3
+tam_pagina = 4096
+reemplazo = fifo
+carga_pagina_ticks = 1
+pid = P1
+R1, pid=P1, pagina=0, t=0, op=leer
+R2, pid=P1, pagina=1, t=1, op=escribir
+R3, pid=P1, pagina=0, t=2, op=leer
+R4, pid=P2, pagina=0, t=1, op=leer
+
+[io]
+politica = scan
+cilindros = 100
+bloquesPorCilindro = 1
+cabezal = 40
+direccion = asc
+cilindrosPorTick = 10
+terminal.entrada = hola
+D1, t=0, pid=P2, dispositivo=disco, op=leer, destino=10
+T1, t=1, pid=P2, dispositivo=terminal, op=escribir, texto="hola"
+
+[archivos]
+imagen = demo.img
+formatear = si
+mkdir /docs
+crear /docs/notas.txt 64
+escribir /docs/notas.txt "contenido de prueba"
+
+[seguridad]
+usuario = docente
+clave_archivo = SOS_CLAVE_ARCHIVO
+permiso = ana:/docs/notas.txt:rw
+permiso = bruno:/docs/notas.txt:r
+dispositivo = disco:docente:rwx
+dispositivo = terminal:docente:rwx
+dispositivo = disco:bruno:rwx
+dispositivo = terminal:bruno:rwx

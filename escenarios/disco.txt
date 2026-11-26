@@ -1,0 +1,15 @@
+# Caso de control del módulo 4: cabezal en 40, dirección ascendente, cola 10,70,20,90.
+# Esperado: FCFS 210, SCAN 148, C-SCAN 178 cilindros.
+[io]
+politica = todas
+cilindros = 100
+bloquesPorCilindro = 1
+bloqueBytes = 128
+cabezal = 40
+direccion = asc
+cilindrosPorTick = 10
+terminal.entrada = hola
+R1, t=0, pid=P1, op=leer, destino=10
+R2, t=0, pid=P1, op=leer, destino=70
+R3, t=0, pid=P1, op=leer, destino=20
+R4, t=0, pid=P1, op=leer, destino=90

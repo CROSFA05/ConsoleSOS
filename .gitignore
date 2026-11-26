@@ -1,5 +1,11 @@
 target/
+build/
 *.class
+*.img
+*.img.bak
+sos.jar
+sos-usuarios.txt
+sos-matriz.txt
 .vscode/
 .settings/
 .classpath

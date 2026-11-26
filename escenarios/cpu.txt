@@ -1,0 +1,13 @@
+# Caso de control del módulo 1: cinco procesos, una ráfaga, sin E/S.
+# cpu=2+3 con io=0+2 significa CPU 2, E/S 2, CPU 3 (ver README).
+[procesos]
+P1, llegada=0, cpu=5, io=0, prioridad=3, memoria=8192
+P2, llegada=0, cpu=3, io=0, prioridad=1, memoria=8192
+P3, llegada=0, cpu=1, io=0, prioridad=4, memoria=8192
+P4, llegada=0, cpu=2, io=0, prioridad=2, memoria=8192
+P5, llegada=0, cpu=4, io=0, prioridad=2, memoria=8192
+
+[planificacion]
+algoritmo = fcfs
+quantum = 2
+comparar = fcfs, sjf, rr, prioridades
