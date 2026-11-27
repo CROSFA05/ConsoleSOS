@@ -223,7 +223,7 @@ El bloque `67` corresponde a `/clase/apuntes.txt` en la secuencia de ejemplo (`f
 
 ## Información del equipo
 
-- **Integrantes:** `Oscar Cantú`, `Alain `, `Samuel Escalante`, `Luis Figueroa`, `Tadeo Peña`
+- **Integrantes:** `Oscar Cantú`, `Jesós Páez`, `Samuel Escalante`, `Luis Figueroa`, `Tadeo Peña`
 - **Materia:** Sistemas Operativos `WSIO01`
 - **Fecha de Entrega:** 27/11/2026
 
